@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary Word files
+~$*
+
+# VS Code
+.vscode/
