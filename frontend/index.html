@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сортировщик медпрепаратов</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>💊 Сортировщик медпрепаратов</h1>
+      <p class="subtitle">Подбор препаратов по симптомам и параметрам пациента</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="search">Поиск препаратов</button>
+      <button class="tab" data-tab="catalog">Каталог</button>
+      <button class="tab" data-tab="profile">Профиль пациента</button>
+      <button class="tab" data-tab="stats">Статистика</button>
+    </div>
+
+    <!-- Вкладка поиска -->
+    <div class="tab-content active" id="search">
+      <div class="card">
+        <h2>Данные пациента</h2>
+        <form id="patientForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Пол:</label>
+              <select id="gender" required>
+                <option value="male">Мужской</option>
+                <option value="female">Женский</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Возраст (лет):</label>
+              <input type="number" id="age" min="0" max="120" required>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Вес (кг):</label>
+              <input type="number" id="weight" min="1" max="300" step="0.1" required>
+            </div>
+            <div class="form-group">
+              <label>Рост (см):</label>
+              <input type="number" id="height" min="50" max="250" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Хронические заболевания:</label>
+            <div class="checkbox-grid" id="chronicDiseases">
+              <label class="checkbox-item">
+                <input type="checkbox" value="астма"> Астма
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="язва желудка"> Язва желудка
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="гастрит"> Гастрит
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="печеночная недостаточность"> Печеночная недостаточность
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="почечная недостаточность"> Почечная недостаточность
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="сердечная недостаточность"> Сердечная недостаточность
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="гипертония"> Гипертония
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="диабет"> Диабет
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Аллергии:</label>
+            <div class="checkbox-grid" id="allergiesList">
+              <label class="checkbox-item">
+                <input type="checkbox" value="пенициллин"> Пенициллин
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="аспирин"> Аспирин
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="парацетамол"> Парацетамол
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="ибупрофен"> Ибупрофен
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="антибиотики"> Антибиотики
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" value="анальгин"> Анальгин
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Симптомы</h2>
+        <div class="form-group">
+          <label>Выберите симптомы:</label>
+          <div class="checkbox-grid" id="symptomsList">
+            <label class="checkbox-item">
+              <input type="checkbox" value="головная боль"> Головная боль
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="температура"> Температура
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="кашель"> Кашель
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="насморк"> Насморк
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="боль в горле"> Боль в горле
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="боль в животе"> Боль в животе
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="тошнота"> Тошнота
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="диарея"> Диарея
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="зубная боль"> Зубная боль
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="мышечная боль"> Мышечная боль
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="слабость"> Слабость
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="головокружение"> Головокружение
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="аллергия"> Аллергия
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="изжога"> Изжога
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="спазмы"> Спазмы
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" value="бессонница"> Бессонница
+            </label>
+          </div>
+        </div>
+        <button id="searchBtn" class="btn btn-primary">🔍 Найти препараты</button>
+      </div>
+
+      <div id="results" class="results"></div>
+    </div>
+
+    <!-- Вкладка каталога -->
+    <div class="tab-content" id="catalog">
+      <div class="card">
+        <h2>Каталог препаратов</h2>
+        <input type="text" id="catalogSearch" class="search-input" placeholder="Поиск по названию...">
+        <div id="catalogList" class="catalog-list"></div>
+      </div>
+    </div>
+
+    <!-- Вкладка профиля -->
+    <div class="tab-content" id="profile">
+      <div class="card">
+        <h2>Сохраненные профили</h2>
+        <p class="info">Профили пациентов сохраняются автоматически при поиске</p>
+        <div id="profileList"></div>
+      </div>
+    </div>
+
+    <!-- Вкладка статистики -->
+    <div class="tab-content" id="stats">
+      <div class="card">
+        <h2>Статистика системы</h2>
+        <div id="statsContent" class="stats-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
