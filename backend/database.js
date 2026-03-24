@@ -1,20 +1,16 @@
 import initSqlJs from 'sql.js';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dbPath = join(__dirname, 'medications.db');
 
-const SQL = await initSqlJs();
-let db;
+// Сбрасываем БД при каждом запуске для обновления данных
+if (existsSync(dbPath)) { try { unlinkSync(dbPath); } catch(e) {} }
 
-if (existsSync(dbPath)) {
-  const buffer = readFileSync(dbPath);
-  db = new SQL.Database(buffer);
-} else {
-  db = new SQL.Database();
-}
+const SQL = await initSqlJs();
+const db = new SQL.Database();
 
 function saveDatabase() {
   const data = db.export();
@@ -50,11 +46,7 @@ const dbWrapper = {
     }
   }),
   exec: (sql) => { db.run(sql); saveDatabase(); },
-  transaction: (fn) => () => {
-    db.run('BEGIN TRANSACTION');
-    try { fn(); db.run('COMMIT'); saveDatabase(); }
-    catch (e) { db.run('ROLLBACK'); throw e; }
-  }
+  transaction: (fn) => () => { fn(); saveDatabase(); }
 };
 
 dbWrapper.exec(`
@@ -62,22 +54,23 @@ dbWrapper.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     inn TEXT NOT NULL,
-    form TEXT NOT NULL,
+    drug_form TEXT NOT NULL,
     release_form TEXT NOT NULL,
     indications TEXT NOT NULL,
     contraindications TEXT NOT NULL,
     side_effects TEXT NOT NULL,
     dosage TEXT NOT NULL,
+    dosage_child TEXT,
     age_min INTEGER DEFAULT 0,
     age_max INTEGER DEFAULT 120,
-    keywords TEXT DEFAULT '',
+    keywords TEXT,
     image_color TEXT DEFAULT '#1565C0'
   );
 
   CREATE TABLE IF NOT EXISTS profiles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    password TEXT NOT NULL,
+    password TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -104,3 +97,23 @@ dbWrapper.exec(`
     FOREIGN KEY (member_id) REFERENCES members(id)
   );
 `);
+
+import { medications } from './medications_data.js';
+import { medications2 } from './medications_data2.js';
+import { medications3 } from './medications_data3.js';
+
+const insertMed = dbWrapper.prepare(`
+  INSERT INTO medications 
+  (name, inn, drug_form, release_form, indications, contraindications, side_effects, dosage, dosage_child, age_min, age_max, keywords, image_color)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`);
+
+const allMeds = [...medications, ...medications2, ...medications3];
+
+const insert = dbWrapper.transaction(() => {
+  for (const med of allMeds) insertMed.run(...med);
+});
+
+insert();
+
+export default dbWrapper;
