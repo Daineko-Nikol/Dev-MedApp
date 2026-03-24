@@ -14,16 +14,34 @@ app.get('/api/medications', (req, res) => {
   let sql = 'SELECT * FROM medications WHERE 1=1';
   const params = [];
 
-  if (drug_form) { sql += ' AND drug_form LIKE ?'; params.push(`%${drug_form}%`); }
-  if (release_form) { sql += ' AND release_form = ?'; params.push(release_form); }
+  // drug_form может быть несколько через запятую — соединяем через OR
+  // Используем LIKE без LOWER() т.к. sql.js не поддерживает LOWER для кириллицы
+  if (drug_form) {
+    const forms = drug_form.split(',').map(f => f.trim()).filter(Boolean);
+    if (forms.length > 0) {
+      const placeholders = forms.map(() => 'drug_form LIKE ?').join(' OR ');
+      sql += ` AND (${placeholders})`;
+      forms.forEach(f => params.push(`%${f}%`));
+    }
+  }
+
+  // release_form может быть несколько через запятую — соединяем через OR
+  if (release_form) {
+    const releases = release_form.split(',').map(r => r.trim()).filter(Boolean);
+    if (releases.length > 0) {
+      const placeholders = releases.map(() => 'release_form = ?').join(' OR ');
+      sql += ` AND (${placeholders})`;
+      releases.forEach(r => params.push(r));
+    }
+  }
+
   if (search) {
     sql += ' AND (name LIKE ? OR inn LIKE ? OR indications LIKE ?)';
     params.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
-  sql += ' ORDER BY name';
 
-  const stmt = dbWrapper.prepare(sql);
-  const meds = stmt.all(...params);
+  sql += ' ORDER BY name';
+  const meds = dbWrapper.prepare(sql).all(...params);
   res.json(meds);
 });
 
@@ -33,17 +51,18 @@ app.get('/api/medications/:id', (req, res) => {
   med ? res.json(med) : res.status(404).json({ error: 'Не найден' });
 });
 
-// Поиск аналогов по МНН
+// Поиск аналогов по МНН (регистронезависимо)
+// sql.js не поддерживает LOWER() для кириллицы — ищем через JS после выборки
 app.get('/api/analogs/:inn', (req, res) => {
-  const meds = dbWrapper.prepare(
-    'SELECT * FROM medications WHERE inn LIKE ? ORDER BY name'
-  ).all(`%${req.params.inn}%`);
+  const inn = req.params.inn.trim().toLowerCase();
+  const allMeds = dbWrapper.prepare('SELECT * FROM medications ORDER BY name').all();
+  const meds = allMeds.filter(m => m.inn.toLowerCase().includes(inn));
   res.json(meds);
 });
 
 // Подбор по симптомам
 app.post('/api/search', (req, res) => {
-  const { symptoms, member, filters } = req.body;
+  const { symptoms, symptomsLabel, member, filters } = req.body;
   if (!symptoms || !member) return res.status(400).json({ error: 'Нет данных' });
 
   const words = symptoms.toLowerCase().split(/[,\s]+/).filter(w => w.length > 2);
@@ -106,8 +125,8 @@ app.post('/api/search', (req, res) => {
   // Сохранение истории
   if (member.id) {
     dbWrapper.prepare(
-      'INSERT INTO search_history (member_id, symptoms, filters, results) VALUES (?, ?, ?, ?)'
-    ).run(member.id, symptoms, JSON.stringify(filters || {}), JSON.stringify(ranked.slice(0, 10).map(r => r.id)));
+      'INSERT INTO search_history (member_id, symptoms, symptoms_label, filters, results) VALUES (?, ?, ?, ?, ?)'
+    ).run(member.id, symptoms, symptomsLabel || symptoms, JSON.stringify(filters || {}), JSON.stringify(ranked.slice(0, 10).map(r => r.id)));
   }
 
   res.json({ count: ranked.length, results: ranked.slice(0, 15) });
@@ -141,18 +160,18 @@ app.get('/api/profiles/:profileId/members', (req, res) => {
 });
 
 app.post('/api/profiles/:profileId/members', (req, res) => {
-  const { name, gender, age, weight, chronic_diseases, allergies } = req.body;
+  const { name, gender, age, weight, chronic_diseases, allergies, role } = req.body;
   const r = dbWrapper.prepare(
-    'INSERT INTO members (profile_id, name, gender, age, weight, chronic_diseases, allergies) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  ).run(req.params.profileId, name, gender, age, weight, chronic_diseases || '', allergies || '');
+    'INSERT INTO members (profile_id, name, gender, age, weight, chronic_diseases, allergies, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run(req.params.profileId, name, gender, age, weight, chronic_diseases || '', allergies || '', role || '');
   res.json({ id: r.lastInsertRowid, name });
 });
 
 app.put('/api/members/:id', (req, res) => {
-  const { age, weight, chronic_diseases, allergies } = req.body;
+  const { age, weight, chronic_diseases, allergies, role } = req.body;
   dbWrapper.prepare(
-    'UPDATE members SET age=?, weight=?, chronic_diseases=?, allergies=? WHERE id=?'
-  ).run(age, weight, chronic_diseases || '', allergies || '', req.params.id);
+    'UPDATE members SET age=?, weight=?, chronic_diseases=?, allergies=?, role=? WHERE id=?'
+  ).run(age, weight, chronic_diseases || '', allergies || '', role || '', req.params.id);
   res.json({ success: true });
 });
 

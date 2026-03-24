@@ -1,16 +1,21 @@
 import initSqlJs from 'sql.js';
-import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs';
+import { writeFileSync, existsSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dbPath = join(__dirname, 'medications.db');
 
-// Сбрасываем БД при каждом запуске для обновления данных
-if (existsSync(dbPath)) { try { unlinkSync(dbPath); } catch(e) {} }
-
 const SQL = await initSqlJs();
-const db = new SQL.Database();
+
+// Загружаем существующую БД или создаём новую
+let db;
+if (existsSync(dbPath)) {
+  const fileBuffer = readFileSync(dbPath);
+  db = new SQL.Database(fileBuffer);
+} else {
+  db = new SQL.Database();
+}
 
 function saveDatabase() {
   const data = db.export();
@@ -50,23 +55,6 @@ const dbWrapper = {
 };
 
 dbWrapper.exec(`
-  CREATE TABLE IF NOT EXISTS medications (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    inn TEXT NOT NULL,
-    drug_form TEXT NOT NULL,
-    release_form TEXT NOT NULL,
-    indications TEXT NOT NULL,
-    contraindications TEXT NOT NULL,
-    side_effects TEXT NOT NULL,
-    dosage TEXT NOT NULL,
-    dosage_child TEXT,
-    age_min INTEGER DEFAULT 0,
-    age_max INTEGER DEFAULT 120,
-    keywords TEXT,
-    image_color TEXT DEFAULT '#1565C0'
-  );
-
   CREATE TABLE IF NOT EXISTS profiles (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -83,6 +71,7 @@ dbWrapper.exec(`
     weight REAL NOT NULL,
     chronic_diseases TEXT DEFAULT '',
     allergies TEXT DEFAULT '',
+    role TEXT DEFAULT '',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (profile_id) REFERENCES profiles(id)
   );
@@ -91,6 +80,7 @@ dbWrapper.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     member_id INTEGER NOT NULL,
     symptoms TEXT NOT NULL,
+    symptoms_label TEXT DEFAULT '',
     filters TEXT DEFAULT '',
     results TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -98,9 +88,34 @@ dbWrapper.exec(`
   );
 `);
 
+// Миграция: добавляем колонку role если её нет
+try { dbWrapper.exec("ALTER TABLE members ADD COLUMN role TEXT DEFAULT ''"); } catch(e) {}
+
 import { medications } from './medications_data.js';
 import { medications2 } from './medications_data2.js';
 import { medications3 } from './medications_data3.js';
+
+// Пересоздаём только таблицу препаратов (данные могут обновляться)
+// Профили, пациенты и история — сохраняются между перезапусками
+dbWrapper.exec('DROP TABLE IF EXISTS medications');
+dbWrapper.exec(`
+  CREATE TABLE medications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    inn TEXT NOT NULL,
+    drug_form TEXT NOT NULL,
+    release_form TEXT NOT NULL,
+    indications TEXT NOT NULL,
+    contraindications TEXT NOT NULL,
+    side_effects TEXT NOT NULL,
+    dosage TEXT NOT NULL,
+    dosage_child TEXT,
+    age_min INTEGER DEFAULT 0,
+    age_max INTEGER DEFAULT 120,
+    keywords TEXT,
+    image_color TEXT DEFAULT '#1565C0'
+  );
+`);
 
 const insertMed = dbWrapper.prepare(`
   INSERT INTO medications 

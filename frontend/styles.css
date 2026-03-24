@@ -158,6 +158,13 @@ body {
   cursor: pointer; white-space: nowrap; transition: background 0.2s;
 }
 .btn-analog:hover { background: var(--blue-dark); }
+.btn-analog-clear {
+  padding: 9px 16px; border-radius: var(--radius-sm);
+  background: var(--white); color: var(--red);
+  border: 1.5px solid var(--red); font-size: 0.92em; font-weight: 600;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.btn-analog-clear:hover { background: #FFEBEE; }
 
 /* MED GRID */
 .med-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
@@ -217,6 +224,13 @@ body {
 .no-results svg { margin-bottom: 12px; opacity: 0.4; }
 
 /* CATALOG TOOLBAR */
+.catalog-filters-row {
+  display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.catalog-filter-group {
+  min-width: 220px; flex: 1;
+}
+/* оставляем старые классы для совместимости */
 .catalog-toolbar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
 .catalog-search-input {
   flex: 1; min-width: 200px; padding: 10px 14px;
@@ -374,3 +388,112 @@ body {
   .main { padding: 16px 10px; }
   .med-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* PROFILE MODAL — новый дизайн */
+.pm-header { text-align: center; margin-bottom: 20px; }
+.pm-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--blue-light); border: 2px solid var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px;
+}
+.pm-header h3 { font-size: 1.25em; font-weight: 700; color: var(--blue-dark); margin-bottom: 4px; }
+.pm-sub { font-size: 0.88em; color: var(--gray-400); }
+.pm-logged { font-size: 0.9em; color: var(--blue); }
+.pm-actions { display: flex; flex-direction: column; gap: 10px; }
+.pm-btn { width: 100%; justify-content: center; }
+.btn-logout {
+  display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+  width: 100%; padding: 10px 22px; border-radius: var(--radius-sm);
+  background: #FFF5F5; color: var(--red);
+  border: 1.5px solid var(--red); font-size: 0.92em; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-logout:hover { background: #FFEBEE; }
+.pm-error {
+  background: #FFEBEE; color: var(--red); border: 1px solid #FFCDD2;
+  border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.88em;
+}
+
+/* Чеклист в модалке */
+.modal-check-list { max-height: 160px; overflow-y: auto; }
+.modal-box--sm { max-width: 480px; }
+
+/* PROFILE TAB — новый layout */
+.profile-layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+.profile-col-left { display: flex; flex-direction: column; gap: 16px; }
+.profile-col-right { display: flex; flex-direction: column; gap: 0; }
+
+.member-detail-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 16px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.member-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.member-detail-block { }
+.member-detail-label {
+  font-size: 0.78em; font-weight: 700; color: var(--gray-400);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
+}
+.member-detail-value { font-size: 0.9em; color: var(--gray-800); line-height: 1.6; }
+
+@media (max-width: 900px) {
+  .profile-layout { grid-template-columns: 1fr; }
+  .member-detail-grid { grid-template-columns: 1fr; }
+}
+
+/* Бейдж пациента в хедере */
+.header-member-badge {
+  display: inline-block;
+  background: var(--blue);
+  color: var(--white);
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 0.82em;
+  font-weight: 600;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.btn-profile-header:hover .header-member-badge {
+  background: var(--white);
+  color: var(--blue);
+}
+
+/* Разделитель секций в модалке пациента */
+.modal-section-divider {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.82em; font-weight: 700; color: var(--red);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin: 35px 0 10px;
+  padding: 8px 10px;
+  background: #FFF5F5;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--red);
+}
+
+/* Пикер пациента в сайдбаре */
+.member-picker {
+  display: flex; flex-direction: column; gap: 4px;
+  margin-bottom: 8px;
+}
+.member-pick-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--gray-200); cursor: pointer;
+  font-size: 0.88em; color: var(--gray-800);
+  transition: all 0.15s; background: var(--white);
+}
+.member-pick-item:hover { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+.member-pick-item.active {
+  border-color: var(--blue); background: var(--blue-light);
+  color: var(--blue); font-weight: 600;
+}
+.member-pick-item svg { flex-shrink: 0; opacity: 0.6; }
+.member-pick-item.active svg { opacity: 1; }
+.member-pick-item span:first-child { flex: 1; }
+.member-pick-age {
+  font-size: 0.8em; color: var(--gray-400);
+  background: var(--gray-100); border-radius: 8px;
+  padding: 1px 8px; margin-left: auto; flex-shrink: 0;
+}
+.member-pick-item.active .member-pick-age { background: #C8E6FA; color: var(--blue); }
