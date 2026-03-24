@@ -1,10 +1,10 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --blue: #1565C0;
-  --blue-dark: #0D47A1;
+  --blue: hsl(231, 97%, 38%);;
+  --blue-dark: hsl(231, 97%, 38%);
   --blue-light: #E3F2FD;
-  --blue-mid: #1976D2;
+  --blue-mid: hsl(231, 38%, 52%);
   --white: #ffffff;
   --gray-50: #F8FAFC;
   --gray-100: #EEF2F7;
@@ -65,7 +65,7 @@ body {
   cursor: pointer; border-bottom: 3px solid transparent;
   transition: all 0.2s;
 }
-.nav-tab:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+.nav-tab:hover { color: var(--white); background: rgba(187, 232, 255, 0.25); }
 .nav-tab.active { color: var(--white); border-bottom-color: var(--white); font-weight: 600; }
 
 /* MAIN */
