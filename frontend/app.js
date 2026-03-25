@@ -24,7 +24,7 @@ const ALLERGY_LIST = [
   { value: 'амоксициллин', label: 'Амоксициллин' },
   { value: 'ципрофлоксацин', label: 'Фторхинолоны' },
   { value: 'аспирин', label: 'Аспирин / НПВС' },
-  { value: 'парацетамол', label: 'Парацетамол' },
+  { value: 'парацетамол', label: 'Параскофен' },
   { value: 'ибупрофен', label: 'Ибупрофен' },
   { value: 'метамизол', label: 'Анальгин (метамизол)' },
   { value: 'лоратадин', label: 'Антигистаминные' },
@@ -49,6 +49,7 @@ const MED_IMAGES = {
   'Ацетилсалициловая кислота': 'images/aspirin.png',
   'Атенолол': 'images/atenolol.png',
   'Бисакодил': 'images/bisakodil.png',
+  'Парацетамол': 'images/paraskofen.png',
 };
 
 function getMedImage(med) { return MED_IMAGES[med.inn] || null; }
@@ -183,9 +184,9 @@ function openMedModal(med) {
     <div class="detail-block"><h4>Лекарственная форма</h4><p>${med.drug_form}</p></div>
     <div class="detail-block"><h4>Показания к применению</h4><p>${med.indications}</p></div>
     <div class="detail-block detail-block--info"><h4>Дозировка${member?' (для данного пациента)':''}</h4><p>${dosageInfo}</p></div>
-    <div class="detail-block detail-block--warn"><h4>Противопоказания</h4><p>${med.contraindications}</p></div>
-    <div class="detail-block"><h4>Побочные эффекты</h4><p>${med.side_effects}</p></div>
-    <div class="disclaimer">Информация носит справочный характер. Перед применением проконсультируйтесь с врачом или фармацевтом.</div>`;
+    <div class="detail-block detail-block--danger"><h4>Противопоказания</h4><p>${med.contraindications}</p></div>
+    <div class="detail-block detail-block--warn"><h4>Побочные эффекты</h4><p>${med.side_effects}</p></div>
+    <div class="disclaimer">Информация носит справочный характер.<p>Перед применением проконсультируйтесь с врачом или фармацевтом!!!</p></div>`;
   document.getElementById('medModal').classList.add('open');
 }
 
@@ -245,7 +246,7 @@ function renderSearchResults(data, member) {
     el.innerHTML = `<div class="no-results"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><p>Препараты не найдены. Попробуйте изменить симптомы или снять фильтры.</p></div>`;
     return;
   }
-  el.innerHTML = `<div class="results-header"><h3>Найдено препаратов: ${data.count}</h3><span style="font-size:0.85em;color:#475569">Нажмите «Подробнее» для полной инструкции</span></div>`;
+  el.innerHTML = `<div class="results-header"><h3>Найдено препаратов: ${data.count}</h3><span style="font-size:0.85em;color:#475569">Нажмите «Подробнее» для открытия краткой инструкции, прилагаемой к препарату</span></div>`;
   const grid = document.createElement('div');
   grid.className = 'med-grid';
   data.results.forEach(med => grid.appendChild(createMedCard(med, med.score)));
@@ -267,7 +268,7 @@ document.getElementById('analogBtn').addEventListener('click', async () => {
   }
   analogFoundIds = new Set(meds.map(m => m.id));
   refreshCatalogVisibility();
-  el.innerHTML = `<p style="margin-top:14px;font-size:0.9em;color:#475569">Найдено: ${meds.length} — эти препараты скрыты в каталоге ниже</p>`;
+  el.innerHTML = `<p style="margin-top:14px;font-size:0.9em;color:#475569">* Этот препарат скрыт в каталоге</p>`;
   const grid = document.createElement('div');
   grid.className = 'med-grid'; grid.style.marginTop = '12px';
   meds.forEach(med => grid.appendChild(createMedCard(med, null)));
@@ -333,8 +334,8 @@ function openProfileModal(step = 'main') {
     body.innerHTML = `
       <div class="pm-header">
         <div class="pm-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
-        <h3>Профиль пациента</h3>
-        ${currentProfile ? `<p class="pm-logged">Вы вошли как: <strong>${currentProfile.name}</strong></p>` : '<p class="pm-sub">Войдите или создайте семейный профиль</p>'}
+        <h3>Профиль</h3>
+        ${currentProfile ? `<p class="pm-logged">Вы вошли как: <strong>${currentProfile.name}</strong></p>` : '<p class="pm-sub">Профиль можно использовать как индивидуальный (один пациент) или же семейный (несколько пациентов)</p>'}
       </div>
       <div class="pm-actions">
         <button class="btn-primary pm-btn" id="pmLogin">
@@ -343,7 +344,7 @@ function openProfileModal(step = 'main') {
         </button>
         <button class="btn-secondary pm-btn" id="pmCreate">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-          Создать новый профиль
+          Создать профиль
         </button>
         ${currentProfile ? `<button class="btn-logout pm-btn" id="pmLogout">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
@@ -368,8 +369,8 @@ function openProfileModal(step = 'main') {
         <div class="pm-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="1.8"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg></div>
         <h3>Войти в профиль</h3>
       </div>
-      <div class="field-group"><label class="field-label">Имя профиля</label>
-        <input id="loginName" class="field-input" placeholder="Введите имя профиля"></div>
+      <div class="field-group"><label class="field-label">Название профиля</label>
+        <input id="loginName" class="field-input" placeholder="Введите название профиля"></div>
       <div class="field-group"><label class="field-label">Пароль</label>
         <input id="loginPass" class="field-input" type="password" placeholder="Введите пароль"></div>
       <div id="loginError" class="pm-error" style="display:none"></div>
@@ -380,7 +381,7 @@ function openProfileModal(step = 'main') {
       const name = document.getElementById('loginName').value.trim();
       const password = document.getElementById('loginPass').value;
       const errEl = document.getElementById('loginError');
-      if (!name) { errEl.textContent = 'Введите имя профиля'; errEl.style.display = 'block'; return; }
+      if (!name) { errEl.textContent = 'Введите название профиля'; errEl.style.display = 'block'; return; }
       if (!password) { errEl.textContent = 'Введите пароль'; errEl.style.display = 'block'; return; }
       errEl.style.display = 'none';
       const r = await api('/profiles/login', { method: 'POST', body: JSON.stringify({ name, password }) });
@@ -398,12 +399,12 @@ function openProfileModal(step = 'main') {
       <div class="pm-header">
         <div class="pm-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></div>
         <h3>Создать профиль</h3>
-        <p class="pm-sub">Семейный профиль для хранения данных пациентов</p>
+        <p class="pm-sub">Профиль для хранения данных пациента(ов)</p>
       </div>
-      <div class="field-group"><label class="field-label">Имя профиля</label>
+      <div class="field-group"><label class="field-label">Название</label>
         <input id="createName" class="field-input" placeholder="Например: Семья Ивановых"></div>
       <div class="field-group"><label class="field-label">Пароль</label>
-        <input id="createPass" class="field-input" type="password" placeholder="Придумайте пароль"></div>
+        <input id="createPass" class="field-input" type="password" placeholder="Придумайте надежный пароль"></div>
       <div class="field-group"><label class="field-label">Подтверждение пароля</label>
         <input id="createPass2" class="field-input" type="password" placeholder="Повторите пароль"></div>
       <div id="createError" class="pm-error" style="display:none"></div>
@@ -415,7 +416,7 @@ function openProfileModal(step = 'main') {
       const password = document.getElementById('createPass').value;
       const password2 = document.getElementById('createPass2').value;
       const errEl = document.getElementById('createError');
-      if (!name) { errEl.textContent = 'Введите имя профиля'; errEl.style.display = 'block'; return; }
+      if (!name) { errEl.textContent = 'Введите название профиля'; errEl.style.display = 'block'; return; }
       if (!password) { errEl.textContent = 'Введите пароль'; errEl.style.display = 'block'; return; }
       if (password !== password2) { errEl.textContent = 'Пароли не совпадают'; errEl.style.display = 'block'; return; }
       errEl.style.display = 'none';
@@ -441,7 +442,7 @@ function openEditMemberModal(member, afterLogin = false) {
   body.innerHTML = `
     <div class="pm-header">
       ${afterLogin ? `<div class="pm-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>` : ''}
-      <h3>${afterLogin ? `Добро пожаловать, ${member.name}!` : `Данные: ${member.name}`}</h3>
+      <h3>${afterLogin ? `Добро пожаловать, ${member.name}!` : `${member.name}`}</h3>
       ${afterLogin ? '<p class="pm-sub">Проверьте и при необходимости обновите анамнез</p>' : ''}
     </div>
     <div class="field-row">
@@ -507,15 +508,15 @@ function openAddMemberModal() {
   body.innerHTML = `
     <div class="pm-header">
       <div class="pm-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M19 8v6M22 11h-6"/></svg></div>
-      <h3>Добавить пациента</h3>
+      <h3> Добавить пациента</h3>
     </div>
-    <div class="field-group"><label class="field-label">Имя пациента</label>
+    <div class="field-group"><label class="field-label">Имя</label>
       <input id="amName" class="field-input" placeholder="Имя"></div>
     <div class="field-row">
       <div class="field-group"><label class="field-label">Возраст (лет)</label>
-        <input id="amAge" class="field-input" type="number" min="0" max="120" placeholder="лет"></div>
+        <input id="amAge" class="field-input" type="number" min="0.1" max="120" placeholder="лет"></div>
       <div class="field-group"><label class="field-label">Вес (кг)</label>
-        <input id="amWeight" class="field-input" type="number" step="0.1" placeholder="кг"></div>
+        <input id="amWeight" class="field-input" type="number" step="2.1" placeholder="кг"></div>
     </div>
     <div class="field-group"><label class="field-label">Роль (необязательно)</label>
       <input id="amRole" class="field-input" placeholder="Например: муж, мама, дедушка..."></div>
@@ -538,12 +539,12 @@ function openAddMemberModal() {
       </div>
     </div>
     <div id="amError" class="pm-error" style="display:none"></div>
-    <button class="btn-primary pm-btn" id="amSave">Добавить пациента</button>`;
+    <button class="btn-primary pm-btn" id="amSave"> Добавить пациента</button>`;
   modal.classList.add('open');
   document.getElementById('amSave').onclick = async () => {
     const name = document.getElementById('amName').value.trim();
     const errEl = document.getElementById('amError');
-    if (!name) { errEl.textContent = 'Введите имя пациента'; errEl.style.display = 'block'; return; }
+    if (!name) { errEl.textContent = 'Введите имя'; errEl.style.display = 'block'; return; }
     errEl.style.display = 'none';
     await api(`/profiles/${currentProfile.id}/members`, {
       method: 'POST',
@@ -640,8 +641,8 @@ async function renderProfileTab() {
     el.innerHTML = `
       <div class="profile-card" style="max-width:480px">
         <h3>Вы не вошли в профиль</h3>
-        <p style="color:#475569;margin-bottom:16px">Создайте профиль или войдите, чтобы сохранять историю подбора и данные пациентов</p>
-        <button class="btn-primary" id="ptLogin">Войти / Создать профиль</button>
+        <p style="color:#475569;margin-bottom:16px">Создайте новый профиль или войдите в существующий, чтобы сохранять анамнез пациента(ов) и отслеживать историю подбора</p>
+        <button class="btn-primary" id="ptLogin">Войти/Создать профиль</button>
       </div>`;
     document.getElementById('ptLogin').onclick = () => openProfileModal();
     return;
@@ -652,9 +653,9 @@ async function renderProfileTab() {
     <div class="profile-layout">
       <div class="profile-col-left">
         <div class="profile-card">
-          <h3>Профиль: ${currentProfile.name}</h3>
+          <h3>${currentProfile.name}</h3>
           <div class="member-list" id="memberList"></div>
-          <button class="btn-primary" id="addMemberBtn">+ Добавить пациента</button>
+          <button class="btn-primary" id="addMemberBtn">+  Добавить пациента</button>
         </div>
       </div>
       <div class="profile-col-right">
@@ -663,7 +664,7 @@ async function renderProfileTab() {
         </div>
         <div class="profile-card" id="historyCard" style="margin-top:20px">
           <h3>История подбора</h3>
-          <p style="color:#94A3B8">Выберите пациента для просмотра истории</p>
+          <p style="color:#94A3B8">Выберите пациента для просмотра его истории подбора</p>
         </div>
       </div>
     </div>`;
@@ -726,7 +727,7 @@ async function loadMemberHistory(member) {
   const card = document.getElementById('historyCard');
   if (!card) return;
   const history = await api(`/members/${member.id}/history`);
-  card.innerHTML = `<h3>История подбора: ${member.name}</h3>`;
+  card.innerHTML = `<h3>История подбора:</h3>`;
   if (!history.length) { card.innerHTML += '<p style="color:#94A3B8;margin-top:8px">История пуста</p>'; return; }
   const list = document.createElement('div');
   list.className = 'history-list';
